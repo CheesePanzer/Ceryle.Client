@@ -65,7 +65,7 @@ try
             {
                 await stream.CopyToAsync(fileStream);
             }
-            AnsiConsole.MarkupLine($"[green]✔ 1. Sync rendering completed:[/] [grey]{syncPath}[/]");
+            AnsiConsole.MarkupLine($"[green]1. Sync rendering completed:[/] [grey]{syncPath}[/]");
 
             // ----------------------------------------------------
             // Test 2: Create Async Rendering Task (CreateDocxRenderTaskAsync)
@@ -73,7 +73,7 @@ try
             ctx.Status("[bold cyan]2/3 Testing CreateDocxRenderTaskAsync (Async)...[/]");
             
             var taskId = await client.CreateDocxRenderTaskAsync("test", requestDto);
-            AnsiConsole.MarkupLine($"[green]✔ 2. Task created successfully! TaskId:[/] [yellow]{taskId}[/]");
+            AnsiConsole.MarkupLine($"[green]2. Task created successfully! TaskId:[/] [yellow]{taskId}[/]");
 
             // ----------------------------------------------------
             // Test 3: Poll and Retry Downloading Task File (DownloadDocxByTaskIdAsync)
@@ -96,12 +96,12 @@ try
                     await taskStream.CopyToAsync(taskFileStream);
 
                     isDownloaded = true;
-                    AnsiConsole.MarkupLine($"[green]✔ 3. Async task file downloaded:[/] [grey]{asyncPath}[/]");
+                    AnsiConsole.MarkupLine($"[green]3. Async task file downloaded:[/] [grey]{asyncPath}[/]");
                     break;
                 }
                 catch (CeryleApiException ex) when (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
                 {
-                    AnsiConsole.MarkupLine($"[yellow]⌛ Task in progress, waiting {delaySeconds}s before retry ({retry}/{maxRetries})...[/]");
+                    AnsiConsole.MarkupLine($"[yellow]Task in progress, waiting {delaySeconds}s before retry ({retry}/{maxRetries})...[/]");
                     await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
                 }
             }
@@ -113,7 +113,7 @@ try
         });
 
     // Success Summary
-    AnsiConsole.Write(new Panel("[bold green]🎉 All integration tests passed successfully![/]")
+    AnsiConsole.Write(new Panel("[bold green]All integration tests passed successfully![/]")
     {
         Border = BoxBorder.Rounded,
         Padding = new Padding(1, 0)
@@ -121,7 +121,7 @@ try
 }
 catch (Exception ex)
 {
-    AnsiConsole.Write(new Panel($"[bold red]✘ Test execution aborted due to an error:[/]\n\n[red]{Markup.Escape(ex.ToString())}[/]")
+    AnsiConsole.Write(new Panel($"[bold red]Test execution aborted due to an error:[/]\n\n[red]{Markup.Escape(ex.ToString())}[/]")
     {
         Border = BoxBorder.Rounded,
         BorderStyle = new Style(Color.Red),

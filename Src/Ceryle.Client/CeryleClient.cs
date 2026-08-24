@@ -111,7 +111,6 @@ public class CeryleClient : ICeryleClient
         }
         finally
         {
-            // 出错时立刻销毁 response 释放连接
             response.Dispose();
         }
     }
