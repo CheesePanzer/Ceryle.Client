@@ -25,7 +25,7 @@ public class RenderRequestDto
     /// The Content that you want to render
     /// </summary>
     [JsonPropertyName("data")]
-    public JsonNode Data { get; set; }
+    public required JsonNode Data { get; set; }
 
     [JsonPropertyName("images")] public List<ImageDataDto>? Images { get; set; } = new();
 

@@ -4,8 +4,23 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
+        <PackageId>Ceryle.Client</PackageId>
+        <Authors>CheesePanzer</Authors>
+        <Company>CheesePanzer</Company>
+        <Description>.NET client for the Ceryle document rendering service.</Description>
+        <PackageProjectUrl>https://github.com/CheesePanzer/Ceryle.Client</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/CheesePanzer/Ceryle.Client.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>ceryle;docx;document-rendering;client</PackageTags>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <MinVerTagPrefix>v</MinVerTagPrefix>
-        <MinVerDefaultVersion>0.1.0-alpha.0</MinVerDefaultVersion>
+        <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
         <MinVerDefaultVersion>0.1.0-alpha.0</MinVerDefaultVersion>
     </PropertyGroup>
 
@@ -16,6 +31,10 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

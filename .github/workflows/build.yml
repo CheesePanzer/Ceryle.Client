@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore Ceryle.Client.sln
+
+      - name: Build
+        run: dotnet build Ceryle.Client.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Ceryle.Client.sln --configuration Release --no-build

@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Globalization;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -16,9 +17,57 @@ public class CeryleClient : ICeryleClient
         _logger = logger;
     }
 
+    public async Task<HealthResultDto> GetHealthAsync(CancellationToken ct = default)
+    {
+        using var response = await _httpClient.GetAsync("/health", ct);
+        await EnsureSuccessAsync(response, ct);
+
+        return await response.Content.ReadFromJsonAsync<HealthResultDto>(cancellationToken: ct)
+               ?? throw new InvalidOperationException("Ceryle returned an empty health response.");
+    }
+
+    public async Task<IReadOnlyList<string>> GetTemplatesAsync(CancellationToken ct = default)
+    {
+        using var response = await _httpClient.GetAsync("/api/v1/templates", ct);
+        await EnsureSuccessAsync(response, ct);
+
+        return await response.Content.ReadFromJsonAsync<List<string>>(cancellationToken: ct) ?? [];
+    }
+
+    public async Task<string> UploadTemplateAsync(
+        Stream content,
+        string fileName,
+        bool overwrite = false,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+
+        using var form = new MultipartFormDataContent();
+        using var fileContent = new StreamContent(content);
+        form.Add(fileContent, "file", fileName);
+        form.Add(new StringContent(overwrite.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()), "overwrite");
+
+        using var response = await _httpClient.PostAsync("/api/v1/templates/upload", form, ct);
+        await EnsureSuccessAsync(response, ct);
+
+        return await ReadRequiredJsonStringAsync(response, ct);
+    }
+
+    public async Task<string> DeleteTemplateAsync(string templateName, CancellationToken ct = default)
+    {
+        using var response = await _httpClient.PostAsync(
+            $"/api/v1/templates/{EscapePathSegment(templateName)}/delete",
+            content: null,
+            ct);
+        await EnsureSuccessAsync(response, ct);
+
+        return await ReadRequiredJsonStringAsync(response, ct);
+    }
+
     public async Task<Stream> GenerateDocxAsync(string templateName, RenderRequestDto requestDto, CancellationToken ct = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/generate/{templateName}")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/generate/{EscapePathSegment(templateName)}")
         {
             Content = JsonContent.Create(requestDto)
         };
@@ -43,7 +92,7 @@ public class CeryleClient : ICeryleClient
 
     public async Task<Guid> CreateDocxRenderTaskAsync(string templateName, RenderRequestDto requestDto, CancellationToken ct = default)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/task/{templateName}")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/task/{EscapePathSegment(templateName)}")
         {
             Content = JsonContent.Create(requestDto)
         };
@@ -113,5 +162,25 @@ public class CeryleClient : ICeryleClient
         {
             response.Dispose();
         }
+    }
+
+    private async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            await HandleErrorResponseAsync(response, ct);
+        }
+    }
+
+    private static async Task<string> ReadRequiredJsonStringAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        return await response.Content.ReadFromJsonAsync<string>(cancellationToken: ct)
+               ?? throw new InvalidOperationException("Ceryle returned an empty response.");
+    }
+
+    private static string EscapePathSegment(string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(value);
+        return Uri.EscapeDataString(value);
     }
 }
